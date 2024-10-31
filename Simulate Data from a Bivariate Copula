@@ -1,0 +1,28 @@
+library(MASS)
+library(ggplot2)
+library(ggExtra)
+## Simulate data from a two-dimensional Gaussian Copula: Try it yourself!
+
+n= 10000 # We'll simulate 10,000 samples
+C=diag(1,2) # Specify the copula correlation
+C[1,2] = C[2,1] = .75 # Specify moderate, positive latent correlation, try strengthening/weakining the association or making it negative!
+
+Z<- mvrnorm(n,mu =  rep(0,2), Sigma = C) #Simulate latent Gaussian variables
+
+#Link the observations marginally
+Y1<-qgamma(pnorm(Z[,1]),rate = 1, shape = 1) # Here, Y_1 ~ Gamma(1,1), try using a different univariate marginal by replacing qgamma with q(insert your favorite distribution)!
+Y2<-qbeta(pnorm(Z[,2]),shape1 = 1,shape2 = 2) # Here, Y_2 ~ Beta(1,2), try using a different univariate marginal qbeta with q(insert your favorite distribution)!
+
+#create plotting data
+Y<- data.frame(Y1,Y2)
+
+#ggplot for bivariate density
+p <- ggplot(Y, aes(x = Y1, y = Y2)) +
+  geom_point() +
+  theme_minimal()+
+  ggtitle("10,000 Samples Simulated from a Bivariate Gaussian Copula")
+
+# Add marginal density plots for Y1 and Y2
+p_with_margins <- ggMarginal(p, type = "density")
+
+p_with_margins
